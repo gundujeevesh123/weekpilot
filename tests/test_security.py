@@ -118,19 +118,23 @@ class TestGuardrails:
     def test_output_redacts_api_keys(self):
         from weekpilot.security.guardrails import validate_output
 
-        output = "Here's the key: AIzaSyB1234567890abcdefghij1234567890ab"
-        cleaned = validate_output(output)
+        # Build a Google-format key at runtime so no literal key string appears
+        # in source (keeps GitHub secret-scanning happy; this value is synthetic).
+        fake_key = "AIza" + "0" * 35
+        cleaned = validate_output(f"Here's the key: {fake_key}")
 
-        assert "AIzaSy" not in cleaned
+        assert fake_key not in cleaned
         assert "[REDACTED" in cleaned
 
     def test_output_redacts_openai_keys(self):
         from weekpilot.security.guardrails import validate_output
 
-        output = "The key is sk-12345678901234567890abcdefghijklmnopqrst"
-        cleaned = validate_output(output)
+        # Synthetic OpenAI-format key built at runtime (no literal key in source).
+        fake_key = "sk-" + "0" * 44
+        cleaned = validate_output(f"The key is {fake_key}")
 
         assert "sk-" not in cleaned
+        assert "[REDACTED" in cleaned
 
 
 # =============================================================================

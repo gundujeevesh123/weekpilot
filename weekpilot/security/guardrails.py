@@ -150,7 +150,8 @@ def validate_output(text: str) -> str:
 
     Example::
 
-        >>> validate_output("Use key AIzaSyA12345678901234567890123456789012345")
+        >>> key = "AIza" + "X" * 35  # synthetic Google-format key (not real)
+        >>> validate_output(f"Use key {key}")
         'Use key [REDACTED-GOOGLE-KEY]'
     """
     result = text
