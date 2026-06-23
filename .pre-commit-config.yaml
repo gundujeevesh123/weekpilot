@@ -1,0 +1,36 @@
+repos:
+  # Prevent secrets from being committed
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: detect-private-key
+        name: Detect private keys
+      - id: check-added-large-files
+        name: Block large files (>1MB)
+        args: ['--maxkb=1024']
+      - id: check-merge-conflict
+        name: Check for merge conflicts
+      - id: trailing-whitespace
+        name: Trim trailing whitespace
+      - id: end-of-file-fixer
+        name: Fix end of file
+
+  # Python linting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.4
+    hooks:
+      - id: ruff
+        name: Ruff linter
+        args: ['--fix']
+      - id: ruff-format
+        name: Ruff formatter
+
+  # Custom secret scanning
+  - repo: local
+    hooks:
+      - id: no-secrets-in-code
+        name: No secrets in code
+        entry: python scripts/security_scan.py
+        language: python
+        pass_filenames: false
+        always_run: true

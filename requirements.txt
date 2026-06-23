@@ -1,0 +1,18 @@
+# WeekPilot — Pinned Dependencies
+# Install: pip install -r requirements.txt
+# Dev:     pip install -r requirements.txt && pip install -e ".[dev]"
+
+google-adk>=2.2.0
+google-genai>=1.0.0
+pydantic>=2.0
+python-dotenv>=1.0.0
+requests>=2.31.0
+mcp>=1.24,<2          # Model Context Protocol SDK (WeekPilot MCP server)
+tzdata>=2024.1        # IANA timezone DB for zoneinfo (required on Windows)
+fastapi>=0.110        # web backend API (also a transitive ADK dependency)
+uvicorn[standard]>=0.29  # ASGI server to run the backend
+
+# Dev dependencies (uncomment for development)
+# pytest>=8.0
+# pytest-asyncio>=0.23
+# ruff>=0.4.0

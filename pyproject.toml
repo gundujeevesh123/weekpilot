@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "weekpilot"
+version = "1.0.0"
+description = "WeekPilot — A privacy-first personal concierge agent that plans your week using Google ADK 2.0"
+readme = "README.md"
+license = {text = "CC-BY-4.0"}
+requires-python = ">=3.10"
+authors = [
+    {name = "WeekPilot Team"},
+]
+keywords = ["ai-agents", "adk", "gemini", "concierge", "privacy", "weekly-planner"]
+
+dependencies = [
+    "google-adk>=2.2.0",
+    "google-genai>=1.0.0",
+    "pydantic>=2.0",
+    "python-dotenv>=1.0.0",
+    "requests>=2.31.0",
+    "mcp>=1.24,<2",
+    "tzdata>=2024.1",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.4.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP", "S", "B"]
+ignore = ["S101"]  # Allow assert in tests
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

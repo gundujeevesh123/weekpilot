@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk -F= '{print \"length=\"length\\($2\\), \"prefix=\"substr\\($2,1,4\\)}')"
+    ]
+  }
+}
