@@ -33,6 +33,17 @@ your entire week — while keeping YOU in control of your data.
 | 🔍 **Research Assistant** | Google Search-grounded meeting prep |
 | 🔒 **Privacy-First** | Consent-gated memory — asks before remembering |
 | 🛡️ **Security-Hardened** | STRIDE threat model, PII redaction, injection defense |
+| 🖥️ **Web App** | Split **dashboard + chat** UI with a live **Day · Time · Work · Notes** schedule table, weather chips, and per-day workload bars |
+
+### 🖥️ The Web App
+
+A bright, elegant React UI (blue/white, light + dark) sits beside a thin, secure
+FastAPI backend that wraps the agent. As you chat in plain language, the
+**My Week** dashboard fills in automatically — schedules render as a clean
+**Day · Time · Work · Notes** table with weather chips, workload bars, and an
+overload warning. In production the backend serves the built UI, so the whole
+app lives behind **one public URL** you can share. See
+[docs/WEB_APP_GUIDE.md](docs/WEB_APP_GUIDE.md).
 
 ---
 
@@ -85,7 +96,7 @@ and adhering to least-privilege.
 ### Setup (one command)
 ```bash
 # Clone the repo
-git clone https://github.com/YOUR_USERNAME/weekpilot.git
+git clone https://github.com/gundujeevesh123/weekpilot.git
 cd weekpilot
 
 # Create venv and install
@@ -118,6 +129,36 @@ python eval/run_eval.py
 # Run security scan
 python scripts/security_scan.py
 ```
+
+### Run the Web App (dashboard + chat)
+
+**Simplest — one URL, one terminal** (builds the UI, then serves everything from
+the backend):
+```bash
+cd frontend && npm install && npm run build && cd ..
+.venv\Scripts\uvicorn backend.main:app --host 0.0.0.0 --port 8000   # Windows
+# .venv/bin/uvicorn backend.main:app --host 0.0.0.0 --port 8000     # macOS/Linux
+```
+Open **http://localhost:8000**. Others on your Wi-Fi can use `http://<your-LAN-ip>:8000`.
+
+**Development mode (live reload)** — two terminals:
+```bash
+# Terminal 1 — backend
+uvicorn backend.main:app --port 8000
+# Terminal 2 — frontend (Vite proxies /api to :8000)
+cd frontend && npm run dev      # open http://localhost:5173
+```
+
+### 🌐 Deploy a public URL (free)
+
+The app is packaged as a single Docker image (UI + API behind one URL):
+1. Push to GitHub.
+2. On [Render](https://render.com): **New → Blueprint** → pick this repo (it reads
+   [`render.yaml`](render.yaml)).
+3. Paste your `GOOGLE_API_KEY` when prompted (stored as a secret, never sent to
+   the browser) → **Create**. You get a public `https://…onrender.com` URL.
+
+Any Docker host works too: `docker build -t weekpilot . && docker run -p 8000:8000 -e GOOGLE_API_KEY=... weekpilot`.
 
 ---
 
@@ -169,10 +210,14 @@ weekpilot/
 ├── memory/               # Consent-gated memory service
 ├── models/               # Pydantic schemas (data contracts)
 └── observability/        # Structured logging with PII redaction
+backend/                  # FastAPI web backend (wraps the agent; serves the UI)
+frontend/                 # React + Vite web app (dashboard + chat UI)
 tests/                    # pytest test suite (tools, security, agents, memory)
 eval/                     # Evaluation cases and runner
 docs/                     # Kaggle write-up, video script, rationale
 scripts/                  # Security scanning
+Dockerfile                # Single-image build (UI + API) for deploy
+render.yaml               # One-click free deploy on Render
 ```
 
 ---
@@ -186,7 +231,7 @@ scripts/                  # Security scanning
 | 3 | Agent Tools | 12+ custom + Google Search + REST API |
 | 4 | Context Engineering | Session state + consent-gated long-term memory |
 | 5 | Security | STRIDE, 4 callbacks, PII detection, consent gating |
-| 6 | Deployability | Clean structure, one-command setup, pinned deps |
+| 6 | Deployability | Web app (FastAPI + React), single-image Docker, one-click Render deploy |
 
 ---
 
