@@ -1,0 +1,29 @@
+# =============================================================================
+# WeekPilot — one-click free deploy on Render (https://render.com)
+#
+# How to deploy (≈5 minutes, free, gives a public https URL anyone can open):
+#   1. Push this repo to GitHub.
+#   2. On Render: New → Blueprint → pick this repo. Render reads this file.
+#   3. When prompted, paste your Google AI Studio key into GOOGLE_API_KEY
+#      (get one at https://aistudio.google.com/apikey).
+#   4. Deploy. You'll get a URL like https://weekpilot.onrender.com — share it.
+#
+# The free plan sleeps after ~15 min idle and cold-starts on the next visit
+# (first request takes ~30s, then it's fast). No credit card required.
+# =============================================================================
+services:
+  - type: web
+    name: weekpilot
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      # Paste your key in the Render dashboard — it is stored as a secret and is
+      # NEVER sent to the browser (the agent reads it server-side only).
+      - key: GOOGLE_API_KEY
+        sync: false
+      # Same-origin in production, so CORS isn't needed; leave unset.
+      # - key: WEEKPILOT_CORS_ORIGINS
+      #   value: https://weekpilot.onrender.com

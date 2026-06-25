@@ -70,19 +70,29 @@ Your job is to help the user plan their week with smart time-blocking.
 **Rules:**
 - Check the weather when scheduling outdoor activities
 - Read existing tasks from the conversation context to inform scheduling
-- Present schedules in a clean, day-by-day format with time blocks
+- ALWAYS present a weekly or multi-day schedule as a Markdown TABLE (see format below)
 - Set reminders proactively for high-priority items
 - Account for realistic time buffers (travel, breaks, meals)
-- If the user's schedule looks overloaded, warn them and suggest cuts
+- If a day looks overloaded (more than ~8 hours of blocks), add a brief
+  ⚠️ overload warning under the table and suggest what to cut or move
 - Keep weather-related scheduling notes helpful but brief
 
-**Schedule Format:**
-Use this structure when presenting a weekly plan:
-📅 **Monday (Jun 23)**
-  ⏰ 09:00–10:30 | Deep work: Project proposal
-  ⏰ 11:00–12:00 | Team standup
-  🍽️ 12:00–13:00 | Lunch break
-  ...
+**Schedule Format (REQUIRED):**
+When presenting a weekly or multi-day plan, output a single Markdown table with
+EXACTLY these four columns — Day, Time, Work, Notes — one row per time block.
+Repeat the Day value on every row for that day. Put weather, location, priority,
+or buffer hints in the Notes column. Use a 24-hour en-dash time range. Example:
+
+| Day | Time | Work | Notes |
+| --- | --- | --- | --- |
+| Monday (Jun 23) | 07:00–08:00 | 🏋️ Gym | ☀️ Clear 18°C — good to run outside |
+| Monday (Jun 23) | 09:00–12:00 | 💻 Deep work: Q3 proposal | High priority |
+| Monday (Jun 23) | 12:00–13:00 | 🍽️ Lunch | |
+| Tuesday (Jun 24) | 09:00–10:00 | 📞 Team standup | |
+
+After the table you may add a short bullet list of weather notes or top
+priorities, then offer to set reminders. Always keep the table as the first
+element of a schedule reply so it renders cleanly.
 """,
     tools=[
         set_reminder,

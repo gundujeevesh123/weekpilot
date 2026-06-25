@@ -22,14 +22,22 @@ from __future__ import annotations
 
 import os
 import uuid
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from google.genai import types
 from google.adk.runners import InMemoryRunner
 
 from weekpilot.agent import root_agent
+
+# Built React app (produced by `npm run build` in frontend/). When present, the
+# backend serves it so the whole product lives behind ONE public URL — which
+# means anyone you share that URL with can use WeekPilot, with no CORS to set up.
+_FRONTEND_DIST = Path(__file__).resolve().parents[1] / "frontend" / "dist"
 
 # A single reusable runner with lightweight in-memory services.
 _runner = InMemoryRunner(agent=root_agent)
@@ -112,3 +120,29 @@ async def chat(req: ChatRequest) -> ChatResponse:
         )
 
     return ChatResponse(session_id=session_id, reply=reply or "(no response)")
+
+
+# ─── Serve the built frontend (single-origin production deploy) ────────────────
+# Registered AFTER the /api routes so those always take priority. In local dev
+# you don't need this — Vite serves the UI on :5173 and proxies /api to :8000.
+if _FRONTEND_DIST.is_dir():
+    _ASSETS = _FRONTEND_DIST / "assets"
+    if _ASSETS.is_dir():
+        app.mount("/assets", StaticFiles(directory=_ASSETS), name="assets")
+
+    @app.get("/")
+    async def _index() -> FileResponse:
+        return FileResponse(_FRONTEND_DIST / "index.html")
+
+    @app.get("/{full_path:path}")
+    async def _spa_fallback(full_path: str) -> FileResponse:
+        """Serve real static files; fall back to index.html for SPA routes.
+
+        This never shadows the API: ``/api/*`` routes are declared above and are
+        matched first. Anything else returns a file if it exists, else the app
+        shell so client-side navigation/deep links work.
+        """
+        candidate = _FRONTEND_DIST / full_path
+        if full_path and candidate.is_file():
+            return FileResponse(candidate)
+        return FileResponse(_FRONTEND_DIST / "index.html")

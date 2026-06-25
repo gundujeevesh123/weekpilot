@@ -10,6 +10,19 @@ Browser (React)  ──/api/chat──►  FastAPI backend  ──►  WeekPilot
   frontend/ :5173                 backend/ :8000        (your existing code)      (key stays server-side)
 ```
 
+## What's new in the UI
+
+- **Split dashboard + chat.** A live **My Week** panel sits beside the chat. Ask
+  WeekPilot to "plan my week…" and the schedule fills in automatically.
+- **Tabular schedule.** Schedules render as a clean **Day · Time · Work · Notes**
+  table (the agent now emits a Markdown table the dashboard parses).
+- **Weather chips + workload bars.** Each day shows its weather and a load bar;
+  days over ~8h get an overload warning (inspired by Sunsama/Reclaim, but inline).
+- **Bright blue/white theme** with light & dark modes, a privacy-first badge, a
+  no-blank-page sample week, and mobile tabs (My Week / Chat).
+- **Single public URL.** In production the backend serves the built UI, so the
+  whole app lives behind one HTTPS address you can share with anyone.
+
 ---
 
 ## 1. One-time setup
@@ -84,21 +97,47 @@ indicator, and a one-click **Try again** on any error (handy if Gemini is busy).
 
 ---
 
-## 5. Deploying (optional) — the realistic Google path
+## 5. Share it with others — free public URL (recommended path)
 
-Note: **Google AI Studio cannot host a full web app** (it's for prototyping
-prompts/models). For a public URL, use Google Cloud — both have generous free
-tiers and scale to zero (so cost stays ~$0 at low traffic):
+The app is packaged as a **single Docker image** that builds the React UI and
+serves it from FastAPI, so one HTTPS URL serves both the app and the `/api`.
+Anyone you give that URL to can use WeekPilot — no install, no localhost.
 
-1. **Backend → Cloud Run.** Containerize `backend/` (uvicorn), set `GOOGLE_API_KEY`
-   via **Secret Manager** (not a committed file), and set `WEEKPILOT_CORS_ORIGINS`
-   to your frontend's URL. Cloud Run gives an HTTPS endpoint and scales to zero.
-2. **Frontend → Firebase Hosting** (or Cloud Run static). Build with
-   `npm run build` and point the app at the Cloud Run backend URL.
+### Option A — Render (free, ~5 minutes, no credit card)
+
+1. Push this repo to GitHub.
+2. Go to [render.com](https://render.com) → **New → Blueprint** → pick your repo.
+   Render reads `render.yaml` and configures everything.
+3. When prompted, paste your Google AI Studio key into **`GOOGLE_API_KEY`**
+   (get one at <https://aistudio.google.com/apikey>). It's stored as a secret and
+   is **never** sent to the browser.
+4. **Create** → you get a URL like `https://weekpilot.onrender.com`. Share it. ✅
+
+   *Free plan note:* the service sleeps after ~15 min idle; the first visit after
+   that cold-starts in ~30s, then it's snappy. Cost stays $0 at low traffic.
+
+### Option B — any Docker host (Railway, Fly.io, Cloud Run, a VPS)
+
+```bash
+docker build -t weekpilot .
+docker run -p 8000:8000 -e GOOGLE_API_KEY=your-key weekpilot
+# open http://localhost:8000  (or the host's public URL)
+```
+
+On Railway/Fly/Cloud Run: deploy the `Dockerfile`, set `GOOGLE_API_KEY` as a
+secret, and the platform's injected `$PORT` is used automatically.
+
+### Run the production build locally (no Docker)
+
+```bash
+cd frontend && npm run build && cd ..
+uvicorn backend.main:app --host 0.0.0.0 --port 8000
+# Now http://<your-LAN-ip>:8000 works for others on your Wi-Fi too.
+```
 
 For the Kaggle submission you do **not** need to deploy — a public GitHub repo
-with these instructions satisfies the "public project link" requirement. If you
-do deploy, add the reproduction steps to your writeup.
+satisfies the "public project link" requirement. If you do deploy, add the URL
+and these steps to your writeup.
 
 ---
 
